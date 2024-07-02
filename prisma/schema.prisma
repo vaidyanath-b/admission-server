@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,96 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model DocumentType {
+  code           String           @id @unique
+  name           String           @unique
+  DocumentUpdate DocumentUpdate[]
+  PhaseDocument  PhaseDocument[]
+  Document       Document[]
+}
+
+enum Role {
+  VERIFIER_1
+  VERIFIER_2
+  ADMIN
+  APPLICANT
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  role            Role             @default(APPLICANT)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+  DocumentUpdates DocumentUpdate[]
+  Applicant       Applicant?
+}
+
+model Applicant {
+  id             Int              @id @default(autoincrement())
+  userId         Int              @unique
+  firstName      String
+  currentPhaseId Int?
+  currentPhase   Phase?           @relation(fields: [currentPhaseId], references: [order])
+  lastName       String
+  User           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  DocumentUpdate DocumentUpdate[]
+  Document       Document[]
+}
+
+model Phase {
+  order             Int              @id
+  name              String           @unique
+  description       String
+  DocumentUpdates   DocumentUpdate[]
+  DocumentsRequired PhaseDocument[]
+  Applicant         Applicant[]
+}
+
+model PhaseDocument {
+  phaseId          Int
+  documentTypeCode String
+  Phase            Phase            @relation(fields: [phaseId], references: [order])
+  DocumentType     DocumentType     @relation(fields: [documentTypeCode], references: [name])
+  DocumentUpdate   DocumentUpdate[]
+
+  @@id([phaseId, documentTypeCode])
+}
+
+model Document {
+  applicantId      Int
+  filename         String
+  url              String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now())
+  Applicant        Applicant        @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  DocumentUpdate   DocumentUpdate[]
+  documentTypeCode String
+  DocumentType     DocumentType     @relation(fields: [documentTypeCode], references: [name])
+
+  @@id([applicantId, documentTypeCode])
+}
+
+model DocumentUpdate {
+  phaseId          Int
+  applicantId      Int
+  verifierId       Int
+  verification     Boolean       @default(false)
+  remark           String        @default("")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now())
+  Applicant        Applicant     @relation(fields: [applicantId], references: [userId], onDelete: Cascade)
+  Document         Document      @relation(fields: [applicantId, documentTypeCode], references: [applicantId, documentTypeCode], onDelete: Cascade)
+  Phase            Phase         @relation(fields: [phaseId], references: [order], onDelete: Cascade)
+  PhaseDocument    PhaseDocument @relation(fields: [phaseId, documentTypeCode], references: [phaseId, documentTypeCode])
+  VerifiedBy       User          @relation(fields: [verifierId], references: [id])
+  documentTypeCode String
+  DocumentType     DocumentType  @relation(fields: [documentTypeCode], references: [name])
+
+  @@id([applicantId, verifierId, phaseId, documentTypeCode])
+  @@index([documentTypeCode])
+  @@index([verifierId, phaseId])
+  @@index([applicantId])
 }
