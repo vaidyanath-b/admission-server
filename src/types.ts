@@ -38,3 +38,16 @@ export type Applicant = types.Applicant;
 export type ApplicantWithoutId = Omit<Applicant, "id">;
 
 export type Document = types.Document;
+
+export type DocumentWithoutUrl = Omit<
+  Document,
+  "url" | "createdAt" | "updatedAt"
+>;
+export type DocumentWithFile = DocumentWithoutUrl & { uploadedDocument: any };
+
+export type DecodedToken = {
+  user_id: number;
+  name: string;
+  email: string;
+  role: types.$Enums.Role[];
+};
