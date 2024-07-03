@@ -90,3 +90,11 @@ export async function updateApplicant(
   }
 }
 
+export default {
+  createApplicant,
+  deleteApplicant,
+  getApplicants,
+  getApplicant,
+  getDocumentsForApplicant,
+  updateApplicant,
+};

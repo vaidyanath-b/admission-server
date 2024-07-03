@@ -1,9 +1,7 @@
 import prisma from "../../prisma/prisma.client";
 import { Document } from "../types";
 import { uploadDocument } from "./storage.services";
-
-type DocumentWithoutUrl = Omit<Document, "url" | "createdAt" | "updatedAt">;
-type DocumentWithFile = DocumentWithoutUrl & { uploadedDocument: any };
+import { DocumentWithoutUrl, DocumentWithFile } from "../types";
 
 export const createDocument = async (
   file: Express.Multer.File,
@@ -143,4 +141,12 @@ export const getVerificationForApplicantId = async (applicantId: number) => {
   } catch (error) {
     throw error;
   }
+};
+
+export default {
+  createDocument,
+  createVerificationWithoutReupload,
+  getDocumentByApplicantId,
+  getVerificationForApplicantId,
+  uploadDocumentToPhase,
 };

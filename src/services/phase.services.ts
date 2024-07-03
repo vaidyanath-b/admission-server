@@ -2,15 +2,16 @@ import { ApplicantPhaseDocuments, DocumentType } from "../types";
 import { Phase } from "../types";
 import prisma from "../../prisma/prisma.client";
 import { PhaseWithApplicants, PhaseWithDocumentTypes } from "../types";
+import { PhaseDocument } from "@prisma/client";
 export async function createPhase(
   name: string,
   order: number,
   description: string,
   documentsRequired: DocumentType[]
-): Promise<Phase> {
+): Promise<Phase & { DocumentsRequired: PhaseDocument[] }> {
   // changeRequired  -- maybe return an error if any documentType already exists in other phase
   try {
-    const phase: Phase = await prisma.phase.create({
+    const phase = await prisma.phase.create({
       data: {
         name,
         order,
@@ -23,6 +24,7 @@ export async function createPhase(
           })),
         },
       },
+      include: { DocumentsRequired: true },
     });
     return phase;
   } catch (error) {
@@ -159,3 +161,13 @@ export async function getApplicantPhaseDocuments(
     throw error;
   }
 }
+
+export default {
+  createPhase,
+  deletePhase,
+  getPhases,
+  getPhase,
+  updatePhase,
+  getApplicantsInCurrentPhase,
+  getApplicantPhaseDocuments,
+};

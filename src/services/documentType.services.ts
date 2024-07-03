@@ -65,3 +65,11 @@ export async function updateDocumentType(
     throw error;
   }
 }
+
+export default {
+  createDocumentType,
+  deleteDocumentType,
+  getDocumentTypes,
+  getDocumentType,
+  updateDocumentType,
+};
