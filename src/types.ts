@@ -1,4 +1,4 @@
-import types, { Applicant } from "@prisma/client";
+import types from "@prisma/client";
 
 export type DocumentType = types.DocumentType;
 type ApplicantPhaseStatusList = types.Applicant & {
@@ -32,3 +32,9 @@ export type PhaseWithDocumentTypes = Phase & {
     DocumentType: types.DocumentType;
   })[];
 };
+
+export type Applicant = types.Applicant;
+
+export type ApplicantWithoutId = Omit<Applicant, "id">;
+
+export type Document = types.Document;
