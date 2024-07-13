@@ -5,8 +5,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schema = ["admission" , "auth"]
 }
-
 model DocumentType {
   code           String           @id @unique
   name           String           @unique
@@ -22,20 +22,14 @@ enum Role {
   APPLICANT
 }
 
-model profile {
-  id   String @id @db.Uuid
-  role Role   @default(APPLICANT)
-  user User   @relation(fields: [id], references: [id])
-}
-
 model User {
-  id              String           @id @db.Uuid
+  id              Int              @id @default(autoincrement())
   email           String           @unique
+  role            Role             @default(APPLICANT)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @default(now())
   DocumentUpdates DocumentUpdate[]
   Applicant       Applicant?
-  profile         profile[]
 }
 
 enum Course {
@@ -63,12 +57,14 @@ model Seats {
 
 model Applicant {
   id                           Int                           @id @default(autoincrement())
-  userId                       String                        @unique @db.Uuid
+  userId                       Int                           @unique
   firstName                    String
   currentPhaseId               Int?
-  currentPhase                 Phase?                        @relation(fields: [currentPhaseId], references: [order])
   lastName                     String
   User                         User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quota                        Quota?
+  course                       Course?
+  currentPhase                 Phase?                        @relation(fields: [currentPhaseId], references: [order])
   DocumentUpdate               DocumentUpdate[]
   Document                     Document[]
   parentDetails                ParentDetails?
@@ -80,22 +76,18 @@ model Applicant {
   matriculationDetails         MatriculationDetails?
   bankDetails                  BankDetails?
   ApplicantDetails             ApplicantDetails?
-  Allotment                    Allotment[]
 }
 
 model Allotment {
-  allotment         Int
-  applicantId       Int
-  course            Course
-  quota             Quota
+  allotment int
+  applicantId Int 
+  course Course
+  quota Quota
   allotmentMemoLink String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  applicant         Applicant @relation(fields: [applicantId], references: [id])
-
-  @@id([applicantId, allotment])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  applicant Applicant @relation(fields: [applicantId], references: [id])
 }
-
 model ApplicantDetails {
   applicantId           Int      @id
   admissionNo           String
@@ -120,16 +112,14 @@ model ApplicantDetails {
 }
 
 model ParentDetails {
-  fatherName       String
-  motherName       String
-  fatherPhone      String
-  fatherOccupation String
-  motherPhone      String
-  fatherEmail      String
-  motherEmail      String
-  motherOccupation String
-  applicantId      Int       @id
-  applicant        Applicant @relation(fields: [applicantId], references: [id])
+  fatherName  String
+  motherName  String
+  fatherPhone String
+  motherPhone String
+  fatherEmail String
+  motherEmail String
+  applicantId Int       @id
+  applicant   Applicant @relation(fields: [applicantId], references: [id])
 }
 
 model PermanentAddress {
@@ -190,7 +180,6 @@ model MatriculationDetails {
   regNoYearOfPass   String
   percentage        Float
   applicantId       Int       @id
-  aadharNo          String
   applicant         Applicant @relation(fields: [applicantId], references: [id])
 }
 
@@ -215,7 +204,7 @@ model PhaseDocument {
   phaseId          Int
   documentTypeCode String
   Phase            Phase            @relation(fields: [phaseId], references: [order])
-  DocumentType     DocumentType     @relation(fields: [documentTypeCode], references: [code])
+  DocumentType     DocumentType     @relation(fields: [documentTypeCode], references: [name])
   DocumentUpdate   DocumentUpdate[]
 
   @@id([phaseId, documentTypeCode])
@@ -238,12 +227,12 @@ model Document {
 model DocumentUpdate {
   phaseId          Int
   applicantId      Int
-  verifierId       String        @db.Uuid
+  verifierId       Int
   verification     Boolean       @default(false)
   remark           String        @default("")
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @default(now())
-  Applicant        Applicant     @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  Applicant        Applicant     @relation(fields: [applicantId], references: [userId], onDelete: Cascade)
   Document         Document      @relation(fields: [applicantId, documentTypeCode], references: [applicantId, documentTypeCode], onDelete: Cascade)
   Phase            Phase         @relation(fields: [phaseId], references: [order], onDelete: Cascade)
   PhaseDocument    PhaseDocument @relation(fields: [phaseId, documentTypeCode], references: [phaseId, documentTypeCode])

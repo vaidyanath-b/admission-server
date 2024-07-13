@@ -8,5 +8,4 @@ router.post("/", documentTypeController.createDocumentTypeController);
 router.delete("/:code", documentTypeController.deleteDocumentTypeController);
 router.put("/:code", documentTypeController.updateDocumentTypeController);
 
-
 export default router;

@@ -1,12 +1,15 @@
 import { Router } from "express";
 
 import applicantController from "../controllers/applicant.controller";
+import { isAuthenticated } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.get("/", applicantController.getApplicantsController);
+router.get("/", applicantController.getApplicationController);
+router.post("/", applicantController.updateApplicationController);
+router.get("/all", applicantController.getApplicantsController);
 router.get("/:id", applicantController.getApplicantController);
-router.post("/", applicantController.createApplicantController);
+router.post("/new", applicantController.createApplicantController);
 router.delete("/:id", applicantController.deleteApplicantController);
 router.put("/:id", applicantController.updateApplicantController);
 router.get(

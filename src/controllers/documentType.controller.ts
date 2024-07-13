@@ -65,6 +65,8 @@ export async function updateDocumentTypeController(
   try {
     const { code } = req.params;
     const { name } = req.body;
+    console.log("code", code);
+    console.log("name", name);
     const documentType = await documentTypeFns.updateDocumentType(code, name);
     res.json(documentType);
   } catch (error: any) {
@@ -83,4 +85,5 @@ export default {
   getDocumentTypesController,
   getDocumentTypeController,
   updateDocumentTypeController,
+  
 };

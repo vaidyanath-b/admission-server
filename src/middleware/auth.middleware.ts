@@ -27,7 +27,15 @@ export function isAuthenticated(
   const token = tokenParts[1];
   try {
     const decodedToken = jwt.verify(token, JWT_SECRET_KEY);
-    // req.userId = decodedToken.user_id;
+    if (!decodedToken) {
+      throw new UnauthorizedError("Invalid token");
+    }
+    const decodedTokenData = decodedToken as DecodedToken;
+    // if (!decodedTokenData) {
+    //   throw new UnauthorizedError("Invalid token");
+    // }
+    // req.user_id = decodedTokenData;
+    req.user_id = decodedTokenData.sub;
     next();
   } catch (err) {
     if (err instanceof TokenExpiredError) {

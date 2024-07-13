@@ -2,16 +2,37 @@ import { Request, Response } from "express";
 
 import documentFns from "../services/document.services";
 import { DocumentWithFile } from "../types";
+import prisma from "../../prisma/prisma.client";
+import { Course, Quota } from "@prisma/client";
 
 export async function createDocumentController(
-  req: Request<{ applicantId: number; documentTypeCode: string }>,
+  req: Request<{ documentTypeCode: string }>,
   res: Response
 ) {
   try {
-    const { applicantId, documentTypeCode } = req.body;
+    const userId = req.user_id;
+    if (!userId) {
+      return res.status(401).json({ message: "User ID not found in request" });
+    }
+    const user = await prisma.applicant.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    // if (user.id !== req.body.applicantId) {
+    //   return res.status(401).json({
+    //     message: "User not authorized to create document for this applicant",
+    //   });
+    // }
+    const applicantId = user.id;
+    const { documentTypeCode } = req.params;
     const file = req.file;
 
     if (!file) {
+      console.log("file", file);
       return res.status(400).json({ message: "Missing document file" });
     }
 
@@ -50,6 +71,53 @@ export async function uploadDocumentToPhaseController(
   } catch (error) {
     console.error("Error uploading document to phase:", error);
     res.status(500).json({ message: "Error uploading document to phase" });
+  }
+}
+export async function updateMemoController(
+  req: Request<
+    {},
+    {},
+    {
+      course: Course;
+      quota: Quota;
+      allotment: string;
+    }
+  >,
+  res: Response
+) {
+  try {
+    const userId = req.user_id;
+    if (!userId) {
+      return res.status(401).json({ message: "User ID not found in request" });
+    }
+    const user = await prisma.applicant.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    const applicantId = user.id;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "Missing document file" });
+    }
+
+    const { course, quota, allotment } = req.body;
+
+    const document = await documentFns.updateMemo({
+      file,
+      applicantId,
+      course,
+      allotment: Number(allotment),
+      quota,
+    });
+    res.json(document);
+  } catch (error) {
+    console.error("Error updating memo:", error);
+    res.status(500).json({ message: "Error updating memo" });
   }
 }
 
@@ -119,4 +187,5 @@ export default {
   createVerificationWithoutReuploadController,
   getDocumentByApplicantIdController,
   getVerificationForApplicantIdController,
+  updateMemoController,
 };

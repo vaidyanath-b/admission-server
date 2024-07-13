@@ -162,6 +162,54 @@ export async function getApplicantPhaseDocuments(
   }
 }
 
+export async function getMetaData() {
+  try {
+    const phases = await prisma.phase.findMany();
+    const documentTypes = await prisma.documentType.findMany();
+    const phaseDocuments = await prisma.phaseDocument.findMany();
+    return { phases, documentTypes, phaseDocuments };
+  } catch (error) {
+    console.error("Error getting metadata:", error);
+    throw error;
+  }
+}
+export async function insertDocumentTypeToPhase(
+  phaseId: number,
+  documentTypeCode: string
+) {
+  try {
+    const phaseDocument = await prisma.phaseDocument.create({
+      data: {
+        phaseId: Number(phaseId),
+        documentTypeCode,
+      },
+    });
+    return phaseDocument;
+  } catch (error) {
+    console.error("Error inserting document type to phase:", error);
+    throw error;
+  }
+}
+
+export async function removeDocumentFromPhase(
+  order: number,
+  documentType: string
+): Promise<void> {
+  try {
+    await prisma.phaseDocument.delete({
+      where: {
+        phaseId_documentTypeCode: {
+          phaseId: order,
+          documentTypeCode: documentType,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error removing document from phase:", error);
+    throw error;
+  }
+}
+
 export default {
   createPhase,
   deletePhase,
@@ -170,4 +218,7 @@ export default {
   updatePhase,
   getApplicantsInCurrentPhase,
   getApplicantPhaseDocuments,
+  getMetaData,
+  insertDocumentTypeToPhase,
+  removeDocumentFromPhase,
 };

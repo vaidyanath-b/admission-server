@@ -12,6 +12,12 @@ router.get(
   "/:order/applicants",
   controller.getApplicantsInCurrentPhaseController
 );
+
+router.post("/:order/:documentType", controller.addDocumentToPhaseController);
+router.delete(
+  "/:order/:documentType",
+  controller.removeDocumentFromPhaseController
+);
 router.get(
   "/:order/applicants/:applicantId",
   controller.getApplicantPhaseDocumentsController

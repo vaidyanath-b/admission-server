@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.configDotenv();
+
 if (!process.env.JWT_SECRET_KEY) {
   throw new Error("MISSING JWT_SECRET_KEY");
 }

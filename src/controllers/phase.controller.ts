@@ -35,6 +35,20 @@ export async function deletePhaseController(
   }
 }
 
+export async function addDocumentToPhaseController(
+  req: Request<{ order: number; documentType: string }>,
+  res: Response
+) {
+  try {
+    const { order, documentType } = req.params;
+    await phaseFns.insertDocumentTypeToPhase(order, documentType);
+    res.json({ message: "Document added to phase successfully" });
+  } catch (error) {
+    console.error("Error adding document to phase:", error);
+    res.status(500).json({ message: "Error adding document to phase" });
+  }
+}
+
 export async function getPhasesController(req: Request, res: Response) {
   try {
     const phases = await phaseFns.getPhases();
@@ -122,6 +136,19 @@ export async function getApplicantPhaseDocumentsController(
       .json({ message: "Error getting applicant phase documents" });
   }
 }
+export async function removeDocumentFromPhaseController(
+  req: Request<{ order: number; documentType: string }>,
+  res: Response
+) {
+  try {
+    const { order, documentType } = req.params;
+    await phaseFns.removeDocumentFromPhase(order, documentType);
+    res.json({ message: "Document removed from phase successfully" });
+  } catch (error) {
+    console.error("Error removing document from phase:", error);
+    res.status(500).json({ message: "Error removing document from phase" });
+  }
+}
 
 export default {
   createPhaseController,
@@ -131,4 +158,6 @@ export default {
   updatePhaseController,
   getApplicantsInCurrentPhaseController,
   getApplicantPhaseDocumentsController,
+  addDocumentToPhaseController,
+  removeDocumentFromPhaseController,
 };

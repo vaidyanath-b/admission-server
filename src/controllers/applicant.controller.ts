@@ -1,8 +1,27 @@
 import { Request, Response } from "express";
 
 import applicantFns from "../services/applicant.services";
-import { Applicant, ApplicantWithoutId } from "../types";
+import { Applicant, ApplicantWithoutId, IApplicationUpdate } from "../types";
+import { ApplicantDetails } from "@prisma/client";
 
+export async function getApplicationController(req: Request, res: Response) {
+  try {
+    console.log("req.user_id", req.user_id);
+    const id = req.user_id;
+    if (!id) {
+      throw new Error("User ID not found in request");
+    }
+    const application = await applicantFns.getApplicationForm(id);
+    res.json(application).status(200);
+  } catch (error: any) {
+    console.error("Error getting application:", error);
+    if (error.message === "Application not found") {
+      res.status(404).json({ message: "Application not found" });
+    } else {
+      res.status(500).json({ message: "Error getting application" });
+    }
+  }
+}
 export async function createApplicantController(
   req: Request<{}, {}, Applicant>,
   res: Response
@@ -96,11 +115,39 @@ export async function updateApplicantController(
   }
 }
 
+export async function updateApplicationController(
+  req: Request<{}, {}, IApplicationUpdate>,
+  res: Response
+) {
+  try {
+    console.log("req.user_id", req.user_id);
+    const { user_id } = req;
+    if (!user_id) {
+      throw new Error("User ID not found in request");
+    }
+    const application = req.body;
+    const applicant = await applicantFns.updateApplication(
+      user_id,
+      application
+    );
+    res.json(applicant);
+  } catch (error: any) {
+    console.error("Error updating application:", error);
+    if (error.message === "Application not found") {
+      res.status(404).json({ message: "Application not found" });
+    } else {
+      res.status(500).json({ message: "Error updating application" });
+    }
+  }
+}
+
 export default {
+  updateApplicationController,
   createApplicantController,
   deleteApplicantController,
   getApplicantsController,
   getApplicantController,
   getDocumentsForApplicantController,
   updateApplicantController,
+  getApplicationController,
 };

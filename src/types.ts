@@ -39,6 +39,7 @@ export type ApplicantWithoutId = Omit<Applicant, "id">;
 
 export type Document = types.Document;
 
+export type Allotment = types.Allotment;
 export type DocumentWithoutUrl = Omit<
   Document,
   "url" | "createdAt" | "updatedAt"
@@ -46,8 +47,21 @@ export type DocumentWithoutUrl = Omit<
 export type DocumentWithFile = DocumentWithoutUrl & { uploadedDocument: any };
 
 export type DecodedToken = {
-  user_id: number;
+  sub: string;
   name: string;
   email: string;
   role: types.$Enums.Role[];
 };
+
+export interface IApplicationUpdate {
+  ApplicantDetails?: types.ApplicantDetails;
+  parentDetails?: types.ParentDetails;
+  presentAddress?: types.PresentAddress;
+  permanentAddress?: types.PermanentAddress;
+  guardianAddress?: types.GuardianAddress;
+  matriculationDetails?: types.MatriculationDetails;
+  bankDetails?: types.BankDetails;
+  qualifyingExaminationDetails?: types.QualifyingExaminationDetails;
+  previousInstitutionDetails?: types.PreviousInstitutionDetails;
+  allotmentDetails?: types.Allotment;
+}
