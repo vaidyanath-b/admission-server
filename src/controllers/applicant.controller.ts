@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
 
-import applicantFns from "../services/applicant.services";
+import applicantFns, {
+  getApplicationForm,
+} from "../services/applicant.services";
 import { Applicant, ApplicantWithoutId, IApplicationUpdate } from "../types";
 import { ApplicantDetails } from "@prisma/client";
+import prisma from "../../prisma/prisma.client";
 
 export async function getApplicationController(req: Request, res: Response) {
   try {
@@ -11,7 +14,18 @@ export async function getApplicationController(req: Request, res: Response) {
     if (!id) {
       throw new Error("User ID not found in request");
     }
-    const application = await applicantFns.getApplicationForm(id);
+    const applicant = await prisma.applicant.findUnique({
+      where: {
+        userId: id,
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!applicant) {
+      throw new Error("No applicant found");
+    }
+    const application = await applicantFns.getApplicationForm(applicant.id);
     res.json(application).status(200);
   } catch (error: any) {
     console.error("Error getting application:", error);
@@ -20,6 +34,24 @@ export async function getApplicationController(req: Request, res: Response) {
     } else {
       res.status(500).json({ message: "Error getting application" });
     }
+  }
+}
+export async function getApplicationByIDController(
+  req: Request<{ applicantId: number }>,
+  res: Response
+) {
+  try {
+    const { applicantId } = req.params;
+
+    if (!applicantId) {
+      throw new Error("ApplicantId not found in Request");
+    }
+
+    const application = await getApplicationForm(Number(applicantId));
+    res.status(200).json(application);
+  } catch (err) {
+    console.log("Error in get application by id", err);
+    res.status(400);
   }
 }
 export async function createApplicantController(

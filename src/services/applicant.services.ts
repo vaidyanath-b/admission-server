@@ -156,7 +156,7 @@ export async function updateApplicant(
   }
 }
 
-export async function getApplicationForm(id: string): Promise<
+export async function getApplicationForm(id: number): Promise<
   | Applicant & {
       ApplicantDetails: ApplicantDetails | null;
       parentDetails: ParentDetails | null;
@@ -173,7 +173,7 @@ export async function getApplicationForm(id: string): Promise<
 > {
   try {
     const applicant = await prisma.applicant.findUnique({
-      where: { userId: id },
+      where: { id: id },
       include: {
         ApplicantDetails: true,
         parentDetails: true,

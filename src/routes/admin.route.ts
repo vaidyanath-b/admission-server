@@ -3,6 +3,7 @@ import {
   getActiveApplicationsController,
   getAllotmentCountController,
 } from "../controllers/admin.controller";
+import { getApplicationByIDController } from "../controllers/applicant.controller";
 const router = Router();
 
 router.get("/", (req, res) => {
@@ -10,6 +11,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/applications", getActiveApplicationsController);
+router.get("/applicant/:applicantId", getApplicationByIDController);
 router.get("/allotment-count", getAllotmentCountController);
 
 export default router;
