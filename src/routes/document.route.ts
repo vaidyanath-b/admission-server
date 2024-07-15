@@ -10,11 +10,6 @@ router.post(
   upload.single("file"),
   documentController.updateMemoController
 );
-router.post(
-  "/:documentTypeCode",
-  upload.single("file"),
-  documentController.createDocumentController
-);
 
 router.post("/upload", documentController.uploadDocumentToPhaseController);
 router.post(
@@ -30,6 +25,11 @@ router.get(
 router.get(
   "/:applicantId",
   documentController.getDocumentByApplicantIdController
+);
+router.post(
+  "/:documentTypeCode",
+  upload.single("file"),
+  documentController.createDocumentController
 );
 
 export default router;

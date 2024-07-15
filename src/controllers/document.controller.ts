@@ -122,18 +122,16 @@ export async function updateMemoController(
 }
 
 export async function createVerificationWithoutReuploadController(
-  req: Request<any>,
+  req: Request,
   res: Response
 ) {
   try {
-    const {
-      applicantId,
-      documentTypeCode,
-      verifierId,
-      phaseId,
-      verification,
-      remark,
-    } = req.body;
+    const verifierId = req.user_id;
+    if (!verifierId) {
+      return res.status(404).json("Unauthorized");
+    }
+    const { applicantId, documentTypeCode, phaseId, verification, remark } =
+      req.body;
     const document = await documentFns.createVerificationWithoutReupload(
       applicantId,
       documentTypeCode,

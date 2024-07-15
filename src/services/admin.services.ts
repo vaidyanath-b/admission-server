@@ -38,3 +38,46 @@ export async function getAllotmentCount(): Promise<IAllotmentCount[]> {
     throw error;
   }
 }
+
+export async function getApplicantsWithPhaseStatus(): Promise<any> {
+  try {
+    const phaseDocuments = await prisma.phaseDocument.findMany();
+    const applicantsWithVerifiedDocs = await prisma.applicant.findMany({
+      select: {
+        id: true,
+        currentPhaseId: true,
+        Allotment: {
+          select: {
+            course: true,
+            quota: true,
+            allotmentMemoLink: true,
+            verified: true,
+          },
+          orderBy: {
+            allotment: "desc",
+          },
+          take: 1,
+        },
+        Document: {
+          select: {
+            documentTypeCode: true,
+            filename: true,
+            DocumentUpdate: {
+              select: {
+                verification: true,
+                phaseId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    console.log({ phaseDocuments, applicantsData: applicantsWithVerifiedDocs });
+
+    return { phaseDocuments, applicantsData: applicantsWithVerifiedDocs };
+  } catch (error) {
+    console.error("Error getting count:", error);
+    throw error;
+  }
+}

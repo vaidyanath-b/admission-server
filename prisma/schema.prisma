@@ -36,6 +36,7 @@ model User {
   DocumentUpdates DocumentUpdate[]
   Applicant       Applicant?
   profile         profile[]
+  Allotment       Allotment[]
 }
 
 enum Course {
@@ -89,6 +90,9 @@ model Allotment {
   course            Course
   quota             Quota
   allotmentMemoLink String?
+  verified          Boolean   @default(false)
+  verifiedBy        String?   @db.Uuid
+  verifier          User?     @relation(fields: [verifiedBy], references: [id])
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   applicant         Applicant @relation(fields: [applicantId], references: [id])

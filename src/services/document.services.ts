@@ -100,6 +100,7 @@ export const uploadDocumentToPhase = async (
   }
 };
 
+
 export const createVerificationWithoutReupload = async (
   applicantId: number,
   documentTypeCode: string,
