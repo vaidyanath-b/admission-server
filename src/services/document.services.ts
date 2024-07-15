@@ -29,12 +29,107 @@ export const createDocument = async (
         filename: `/${applicantId}/${documentTypeCode}.${extension}`,
         url: `/${applicantId}/${documentTypeCode}.${extension}`,
       },
+      include: {
+        DocumentUpdate: true,
+      },
     });
+    let newPhase = null;
+    if (document.DocumentUpdate.length > 0) {
+      const nice = await prisma.documentUpdate.updateMany({
+        where: {
+          applicantId,
+          documentTypeCode,
+        },
+        data: {
+          verification: false,
+        },
+      });
+      /* extra sauce */
+      const phaseN = await prisma.phaseDocument.findFirst({
+        where: {
+          documentTypeCode,
+        },
+        orderBy: {
+          phaseId: "asc",
+        },
+      });
+      if (phaseN) {
+        await prisma.applicant.update({
+          where: {
+            id: applicantId,
+          },
+          data: {
+            currentPhaseId: phaseN.phaseId,
+          },
+        });
+      }
+    }
+
     const uploadedDoc = await uploadDocument(
       file,
       applicantId,
       documentTypeCode
     );
+
+    const quotaW = await prisma.allotment.findFirst({
+      where: {
+        applicantId,
+      },
+
+      orderBy: {
+        allotment: "desc",
+      },
+      take: 1,
+      select: {
+        applicant: {
+          select: {
+            docsComplete: true,
+          },
+        },
+        quota: true,
+      },
+    });
+
+    if (!quotaW) {
+      throw new Error("No quota");
+    }
+    const {
+      quota,
+      applicant: { docsComplete },
+    } = quotaW;
+    if (!docsComplete) {
+      const documents = await prisma.phaseDocument.findMany({
+        distinct: "documentTypeCode",
+        select: {
+          documentTypeCode: true,
+        },
+        where: {
+          includedQuotas: {
+            has: quota,
+          },
+        },
+      });
+
+      const types = documents.map((doc) => doc.documentTypeCode);
+      const updates = await prisma.document.count({
+        where: {
+          applicantId,
+          documentTypeCode: {
+            in: types,
+          },
+        },
+      });
+      if ((documents.length = updates)) {
+        await prisma.applicant.update({
+          where: {
+            id: applicantId,
+          },
+          data: {
+            docsComplete: true,
+          },
+        });
+      }
+    }
     return { ...document, uploadedDocument: uploadedDoc };
   } catch (error) {
     throw error;
@@ -100,7 +195,6 @@ export const uploadDocumentToPhase = async (
   }
 };
 
-
 export const createVerificationWithoutReupload = async (
   applicantId: number,
   documentTypeCode: string,
@@ -110,14 +204,82 @@ export const createVerificationWithoutReupload = async (
   remark?: string
 ) => {
   try {
-    const document = await prisma.documentUpdate.create({
-      data: {
+    const document = await prisma.documentUpdate.upsert({
+      where: {
+        applicantId_verifierId_phaseId_documentTypeCode: {
+          applicantId,
+          documentTypeCode,
+          phaseId,
+          verifierId,
+        },
+      },
+      create: {
         applicantId,
         documentTypeCode,
         phaseId,
         verifierId,
         verification,
         remark,
+      },
+      update: {
+        verification,
+        remark,
+      },
+    });
+
+    const quotaW = await prisma.allotment.findFirst({
+      where: {
+        applicantId,
+      },
+      orderBy: {
+        allotment: "desc",
+      },
+      take: 1,
+      select: {
+        quota: true,
+      },
+    });
+    if (!quotaW) {
+      throw new Error("No quota");
+    }
+    const { quota } = quotaW;
+    const documents = await prisma.phaseDocument.findMany({
+      select: {
+        documentTypeCode: true,
+      },
+      where: {
+        phaseId,
+        includedQuotas: {
+          has: quota,
+        },
+      },
+    });
+    const types = documents.map((doc) => doc.documentTypeCode);
+    const updates = await prisma.documentUpdate.findMany({
+      where: {
+        applicantId,
+        phaseId,
+        verification: true,
+        documentTypeCode: {
+          in: types,
+        },
+      },
+    });
+    if (updates.length == types.length) {
+      await prisma.applicant.update({
+        where: {
+          id: applicantId,
+        },
+        data: {
+          currentPhaseId: phaseId + 1,
+        },
+      });
+    }
+    const count = await prisma.documentUpdate.count({
+      where: {
+        applicantId: applicantId,
+        verification: true,
+        phaseId: phaseId,
       },
     });
     return document;

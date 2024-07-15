@@ -20,17 +20,10 @@ import {
 } from "../types";
 
 export async function updateApplication(
-  userId: string,
+  applicantId: number,
   application: IApplicationUpdate
 ): Promise<Applicant> {
   try {
-    console.log("userId", userId);
-    const applicant = await prisma.applicant.findUnique({
-      where: { userId },
-    });
-    if (!applicant) {
-      throw new Error("Applicant not found");
-    }
     console.log(application);
 
     const keys = [
@@ -45,6 +38,7 @@ export async function updateApplication(
       "previousInstitutionDetails",
       "allotmentDetails",
     ];
+
     const toUpdate = Object.keys(application).reduce((acc: any, key) => {
       if (!keys.includes(key)) return acc;
       if (!acc[key]) acc[key] = { upsert: { create: {}, update: {} } }; // Initialize if not already
@@ -59,11 +53,37 @@ export async function updateApplication(
     console.log(toUpdate);
 
     const updatedApplicant = await prisma.applicant.update({
-      where: { userId },
+      where: { id: Number(applicantId) },
       data: {
         ...toUpdate,
       },
     });
+
+    if (!updatedApplicant.infoComplete) {
+      const notNullCondition = keys.reduce((acc: any, key) => {
+        acc[key] = {
+          isNot: null,
+        };
+        return acc;
+      }, {});
+
+      const exists = await prisma.applicant.count({
+        where: {
+          id: applicantId,
+        },
+        ...notNullCondition,
+      });
+      if (exists > 0) {
+        await prisma.applicant.update({
+          where: {
+            id: applicantId,
+          },
+          data: {
+            infoComplete: true,
+          },
+        });
+      }
+    }
     return updatedApplicant;
   } catch (error) {
     console.error("Error updating applicant:", error);
@@ -76,7 +96,10 @@ export async function createApplicant(
 ): Promise<ApplicantWithoutId> {
   try {
     const applicant: Applicant = await prisma.applicant.create({
-      data: application,
+      data: {
+        ...application,
+        id: Number(application.id),
+      },
     });
     return applicant;
   } catch (error) {

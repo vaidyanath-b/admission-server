@@ -70,6 +70,8 @@ model Applicant {
   currentPhase                 Phase?                        @relation(fields: [currentPhaseId], references: [order])
   lastName                     String
   User                         User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  infoComplete                 Boolean  @default(false)
+  docsComplete                 Boolean  @default(false)
   DocumentUpdate               DocumentUpdate[]
   Document                     Document[]
   parentDetails                ParentDetails?
@@ -217,6 +219,7 @@ model Phase {
 
 model PhaseDocument {
   phaseId          Int
+  includedQuotas   Quota[] @default([GENERAL, SC, ST , OBC , EWS])
   documentTypeCode String
   Phase            Phase            @relation(fields: [phaseId], references: [order])
   DocumentType     DocumentType     @relation(fields: [documentTypeCode], references: [code])

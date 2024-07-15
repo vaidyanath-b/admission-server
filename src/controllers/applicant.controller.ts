@@ -60,7 +60,14 @@ export async function createApplicantController(
 ) {
   try {
     const application = req.body;
-    const applicant = await applicantFns.createApplicant(application);
+    const userId = req.user_id;
+    if (!userId) {
+      return res.status(404).json("couldnt get the user");
+    }
+    const applicant = await applicantFns.createApplicant({
+      ...application,
+      userId,
+    });
     res.json(applicant);
   } catch (error) {
     console.error("Error creating applicant:", error);
@@ -153,13 +160,25 @@ export async function updateApplicationController(
 ) {
   try {
     console.log("req.user_id", req.user_id);
-    const { user_id } = req;
-    if (!user_id) {
-      throw new Error("User ID not found in request");
+    const userId = req.user_id;
+    if (!userId) {
+      return res.status(404).json("couldnt get the user");
     }
+    const applicantInfo = await prisma.applicant.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        userId,
+      },
+    });
+    if (!applicantInfo) {
+      return res.status(402).json("No applicant found");
+    }
+
     const application = req.body;
     const applicant = await applicantFns.updateApplication(
-      user_id,
+      applicantInfo.id,
       application
     );
     res.json(applicant);

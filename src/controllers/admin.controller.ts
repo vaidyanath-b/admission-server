@@ -4,6 +4,9 @@ import {
   getApplicantsWithPhaseStatus,
 } from "../services/admin.services";
 import { Request, Response } from "express";
+import { IApplicationUpdate } from "../types";
+import prisma from "../../prisma/prisma.client";
+import { updateApplication } from "../services/applicant.services";
 export const getActiveApplicationsController = async (
   req: Request,
   res: Response
@@ -28,6 +31,32 @@ export const getAllotmentCountController = async (
     console.error("Error getting allotment count:", error);
     res.status(500).json({ message: "Error getting allotment count" });
   }
+};
+
+export const updateApplicationByIDController = async (
+  req: Request<{}, {}, IApplicationUpdate>,
+  res: Response
+) => {
+  const userId = req.user_id;
+  if (!userId) {
+    return res.status(401).json("Not authorized");
+  }
+  const applicantInfo = await prisma.applicant.findUnique({
+    where: {
+      userId,
+    },
+  });
+  if (!applicantInfo) {
+    return res.status(401).json("No applicant found");
+  }
+
+  const application = req.body;
+
+  const updatedApplicant = await updateApplication(
+    applicantInfo.id,
+    application
+  );
+  return res.status(200).json(updatedApplicant);
 };
 
 export const getApplicantsWithPhaseStatusController = async (

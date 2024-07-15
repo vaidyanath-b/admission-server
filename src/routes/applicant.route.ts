@@ -8,8 +8,8 @@ const router = Router();
 router.get("/", applicantController.getApplicationController);
 router.post("/", applicantController.updateApplicationController);
 router.get("/all", applicantController.getApplicantsController);
-router.get("/:id", applicantController.getApplicantController);
 router.post("/new", applicantController.createApplicantController);
+router.get("/:id", applicantController.getApplicantController);
 router.delete("/:id", applicantController.deleteApplicantController);
 router.put("/:id", applicantController.updateApplicantController);
 router.get(
