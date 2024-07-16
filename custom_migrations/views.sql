@@ -3,12 +3,15 @@ SELECT DISTINCT ON ("applicantId")
         "applicantId",
         "course",
         "quota",
-        "allotment"
-    FROM
-        "admission"."Allotment"
-    ORDER BY
+        "allotment",
+  a."firstName",
+  a."lastName"
+from
+  admission."Allotment"
+  join admission."Applicant" a on a.id = admission."Allotment"."applicantId"
+ORDER BY
         "applicantId", "allotment" DESC;
-
+        
 create or replace view
   allotmentCount as
 select

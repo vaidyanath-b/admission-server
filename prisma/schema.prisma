@@ -15,7 +15,7 @@ model DocumentType {
   Document       Document[]
 }
 
-enum Role {
+enum role_custom {
   VERIFIER_1
   VERIFIER_2
   ADMIN
@@ -24,7 +24,7 @@ enum Role {
 
 model profile {
   id   String @id @db.Uuid
-  role Role   @default(APPLICANT)
+  role role_custom   @default(APPLICANT)
   user User   @relation(fields: [id], references: [id])
 }
 

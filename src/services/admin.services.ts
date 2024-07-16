@@ -18,7 +18,7 @@ export async function getActiveApplications(): Promise<IActiveApplications[]> {
   try {
     const activeAllotments = await prisma.$queryRaw<
       IActiveApplications[]
-    >`Select * from active_allotments`;
+    >`Select *  from active_allotments`;
 
     return activeAllotments;
   } catch (error) {
@@ -46,6 +46,8 @@ export async function getApplicantsWithPhaseStatus(): Promise<any> {
       select: {
         id: true,
         currentPhaseId: true,
+        firstName: true,
+        lastName: true,
         Allotment: {
           select: {
             course: true,
