@@ -9,7 +9,6 @@ import prisma from "../../prisma/prisma.client";
 
 export async function getApplicationController(req: Request, res: Response) {
   try {
-    "req.user_id", req.user_id);
     const id = req.user_id;
     if (!id) {
       throw new Error("User ID not found in request");
@@ -50,7 +49,6 @@ export async function getApplicationByIDController(
     const application = await getApplicationForm(Number(applicantId));
     res.status(200).json(application);
   } catch (err) {
-    "Error in get application by id", err);
     res.status(400);
   }
 }
@@ -159,7 +157,6 @@ export async function updateApplicationController(
   res: Response
 ) {
   try {
-    "req.user_id", req.user_id);
     const userId = req.user_id;
     if (!userId) {
       return res.status(404).json("couldnt get the user");

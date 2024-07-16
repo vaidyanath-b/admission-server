@@ -133,7 +133,6 @@ export async function createDocumentByIDController(
     const file = req.file;
 
     if (!file) {
-      "file", file);
       return res.status(400).json({ message: "Missing document file" });
     }
 
