@@ -24,7 +24,7 @@ export async function updateApplication(
   application: IApplicationUpdate
 ): Promise<Applicant> {
   try {
-    console.log(application);
+    application);
 
     const keys = [
       "ApplicantDetails",
@@ -57,7 +57,7 @@ export async function updateApplication(
         ...toUpdate,
       },
     });
-    console.log(updatedApplicant.infoComplete);
+    updatedApplicant.infoComplete);
     if (!updatedApplicant.infoComplete) {
       const notNullCondition = keys.reduce((acc: any, key) => {
         if (key == "Allotment") {

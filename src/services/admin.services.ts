@@ -19,7 +19,7 @@ export async function getActiveApplications(): Promise<IActiveApplications[]> {
     const activeAllotments = await prisma.$queryRaw<
       IActiveApplications[]
     >`Select * from active_allotments`;
-    console.log(activeAllotments);
+    activeAllotments);
     return activeAllotments;
   } catch (error) {
     console.error("Error getting count:", error);
@@ -31,7 +31,7 @@ export async function getAllotmentCount(): Promise<IAllotmentCount[]> {
   try {
     const allotmentCount = await prisma.$queryRaw<IAllotmentCount[]>`
         SELECT course, quota, CAST(count AS VARCHAR) as count from allotmentCount`;
-    console.log(allotmentCount);
+    allotmentCount);
     return allotmentCount;
   } catch (error) {
     console.error("Error getting count:", error);
@@ -73,7 +73,7 @@ export async function getApplicantsWithPhaseStatus(): Promise<any> {
       },
     });
 
-    console.log({ phaseDocuments, applicantsData: applicantsWithVerifiedDocs });
+    { phaseDocuments, applicantsData: applicantsWithVerifiedDocs });
 
     return { phaseDocuments, applicantsData: applicantsWithVerifiedDocs };
   } catch (error) {

@@ -11,7 +11,7 @@ export const createDocument = async (
   try {
     const extenstions = file.mimetype.split("/");
     const extension = extenstions[extenstions.length - 1];
-    console.log("extension", extension);
+    "extension", extension);
     const document = await prisma.document.upsert({
       where: {
         applicantId_documentTypeCode: {
