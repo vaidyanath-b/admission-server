@@ -36,7 +36,7 @@ export async function updateApplication(
       "bankDetails",
       "qualifyingExaminationDetails",
       "previousInstitutionDetails",
-      "allotmentDetails",
+      "Allotment",
     ];
 
     const toUpdate = Object.keys(application).reduce((acc: any, key) => {
@@ -50,7 +50,6 @@ export async function updateApplication(
       }
       return acc;
     }, {} as IApplicationUpdate);
-    console.log(toUpdate);
 
     const updatedApplicant = await prisma.applicant.update({
       where: { id: Number(applicantId) },
@@ -58,9 +57,12 @@ export async function updateApplication(
         ...toUpdate,
       },
     });
-
+    console.log(updatedApplicant.infoComplete);
     if (!updatedApplicant.infoComplete) {
       const notNullCondition = keys.reduce((acc: any, key) => {
+        if (key == "Allotment") {
+          return acc;
+        }
         acc[key] = {
           isNot: null,
         };
@@ -70,8 +72,9 @@ export async function updateApplication(
       const exists = await prisma.applicant.count({
         where: {
           id: applicantId,
+
+          ...notNullCondition,
         },
-        ...notNullCondition,
       });
       if (exists > 0) {
         await prisma.applicant.update({

@@ -6,7 +6,7 @@ import upload from "../middleware/multer.middleware";
 const router = Router();
 
 router.post(
-  "/memo",
+  "/allotment/memo",
   upload.single("file"),
   documentController.updateMemoController
 );
